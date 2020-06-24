@@ -3,6 +3,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.VoiceNext;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,11 @@ namespace Cybot
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
+        public static VoiceNextExtension Voice { get; private set; }
 
         public async Task RunAsync()
         {
+
             var json = string.Empty;
 
             using (var fs = File.OpenRead("config.json"))
@@ -27,6 +30,7 @@ namespace Cybot
                 json = await sr.ReadToEndAsync().ConfigureAwait(false);
 
             var configJson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
 
             var config = new DiscordConfiguration
             {
@@ -45,6 +49,7 @@ namespace Cybot
                 Timeout = TimeSpan.FromMinutes(1)
             });
 
+
             var commandsConfig = new CommandsNextConfiguration
             {
                 StringPrefixes = new string[] { configJson.Prefix },
@@ -55,6 +60,15 @@ namespace Cybot
             Commands = Client.UseCommandsNext(commandsConfig);
 
             Commands.RegisterCommands<TestCommands>();
+            Commands.RegisterCommands<MusicCommands>();
+
+            var voiceConfiguration = new VoiceNextConfiguration
+            {
+                //configuration of voice
+            };
+
+
+            Voice = Client.UseVoiceNext(voiceConfiguration);
 
             await Client.ConnectAsync();
 
